@@ -24,6 +24,7 @@ select{font:inherit;padding:8px 12px;border-radius:8px}
   var cur, st, t0;
   function load(i) {
     cur = T[i]; st = {}; A[cur.anim].init(st, cur.w, cur.h); t0 = performance.now();
+    img.onerror = function () { img.onerror = null; img.src = './targets-images/' + cur.file; };
     img.src = './targets/' + cur.file; img.style.width = cur.w + 'px'; img.style.height = cur.h + 'px';
     cv.width = (cur.w + 2 * cur.m) * 2; cv.height = (cur.h + 2 * cur.m) * 2;
     cv.style.width = (cur.w + 2 * cur.m) + 'px'; cv.style.height = (cur.h + 2 * cur.m) + 'px'; cv.style.left = -cur.m + 'px'; cv.style.top = -cur.m + 'px';

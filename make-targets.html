@@ -29,9 +29,13 @@ ul{padding-left:20px}
   var T = window.DPAR.TARGETS, list = document.getElementById('list'), btn = document.getElementById('go'), imgs = [], ok = 0;
   T.forEach(function (t, i) {
     var li = document.createElement('li'); li.textContent = (i + 1) + '. targets/' + t.file + ' … checking'; list.appendChild(li);
-    var im = new Image(); im.onload = function () { li.textContent = (i + 1) + '. targets/' + t.file + ' ✓'; li.className = 'ok'; ok++; if (ok === T.length) btn.disabled = false; };
-    im.onerror = function () { li.textContent = (i + 1) + '. targets/' + t.file + ' ✗ missing'; li.className = 'bad'; };
-    im.src = './targets/' + t.file; imgs[i] = im;
+    var folders = ['targets', 'targets-images'], f = 0;
+    var im = new Image(); im.onload = function () { li.textContent = (i + 1) + '. ' + folders[f] + '/' + t.file + ' ✓'; li.className = 'ok'; ok++; if (ok === T.length) btn.disabled = false; };
+    im.onerror = function () {
+      f++; if (f < folders.length) { im.src = './' + folders[f] + '/' + t.file; return; }
+      li.textContent = (i + 1) + '. ' + t.file + ' ✗ missing'; li.className = 'bad';
+    };
+    im.src = './' + folders[0] + '/' + t.file; imgs[i] = im;
   });
   btn.addEventListener('click', async function () {
     btn.disabled = true; var msg = document.getElementById('msg'); msg.textContent = 'Building… this takes a minute or two.';

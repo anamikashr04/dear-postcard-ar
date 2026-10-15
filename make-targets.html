@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dear Postcard – Make targets</title>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js"></script>
+<script src="./ar.js"></script>
+<style>
+body{margin:0;padding:32px 20px;font-family:system-ui,sans-serif;background:#faf6ee;color:#222;max-width:720px;margin:auto;line-height:1.5}
+h1{margin:0 0 8px}
+button{font:inherit;font-weight:600;padding:12px 24px;border:0;border-radius:999px;background:#1d1a3a;color:#fff}
+button:disabled{opacity:.5}
+ul{padding-left:20px}
+.ok{color:#1d7a3a}.bad{color:#b3261e}
+#bar{height:10px;background:#e4ddd0;border-radius:5px;overflow:hidden;margin:16px 0}
+#bar div{height:100%;width:0;background:#e8467c;transition:width .2s}
+</style>
+</head>
+<body>
+<h1>Make the AR target file</h1>
+<p>Open this page on a laptop after uploading the card images into the <b>targets</b> folder. It checks every image, then builds <b>targets.mind</b> and downloads it. Upload that file to the main folder of your repository.</p>
+<ul id="list"></ul>
+<button id="go" type="button" disabled>Build targets.mind</button>
+<div id="bar"><div></div></div>
+<p id="msg"></p>
+<script>
+(function () {
+  var T = window.DPAR.TARGETS, list = document.getElementById('list'), btn = document.getElementById('go'), imgs = [], ok = 0;
+  T.forEach(function (t, i) {
+    var li = document.createElement('li'); li.textContent = (i + 1) + '. targets/' + t.file + ' … checking'; list.appendChild(li);
+    var im = new Image(); im.onload = function () { li.textContent = (i + 1) + '. targets/' + t.file + ' ✓'; li.className = 'ok'; ok++; if (ok === T.length) btn.disabled = false; };
+    im.onerror = function () { li.textContent = (i + 1) + '. targets/' + t.file + ' ✗ missing'; li.className = 'bad'; };
+    im.src = './targets/' + t.file; imgs[i] = im;
+  });
+  btn.addEventListener('click', async function () {
+    btn.disabled = true; var msg = document.getElementById('msg'); msg.textContent = 'Building… this takes a minute or two.';
+    var compiler = new window.MINDAR.IMAGE.Compiler();
+    await compiler.compileImageTargets(imgs, function (p) { document.querySelector('#bar div').style.width = p.toFixed(0) + '%'; });
+    var buf = await compiler.exportData();
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([buf])); a.download = 'targets.mind'; a.click();
+    msg.textContent = 'Done! targets.mind downloaded. Upload it to the main folder of your repository.';
+  });
+})();
+</script>
+</body>
+</html>

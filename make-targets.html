@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dear Postcard – Make targets</title>
-<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js"></script>
 <script src="./ar.js"></script>
 <style>
 body{margin:0;padding:32px 20px;font-family:system-ui,sans-serif;background:#faf6ee;color:#222;max-width:720px;margin:auto;line-height:1.5}
@@ -46,7 +45,11 @@ ul{padding-left:20px}
       c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return c;
     });
     var start = Date.now();
-    var compiler = new window.MINDAR.IMAGE.Compiler();
+    try {
+    msg.textContent = 'Loading the build tool…';
+    var mod = await import('https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js');
+    var compiler = new mod.Compiler();
+    msg.textContent = 'Building… 0%. Keep this tab open.';
     await compiler.compileImageTargets(small, function (p) {
       document.querySelector('#bar div').style.width = p.toFixed(0) + '%';
       msg.textContent = 'Building… ' + p.toFixed(0) + '% (' + Math.round((Date.now() - start) / 1000) + ' s). Keep this tab open.';
@@ -54,6 +57,7 @@ ul{padding-left:20px}
     var buf = await compiler.exportData();
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([buf])); a.download = 'targets.mind'; a.click();
     msg.textContent = 'Done! targets.mind downloaded. Upload it to the main folder of your repository.';
+    } catch (e) { msg.textContent = 'Error: ' + (e && e.message ? e.message : e) + ' (send a screenshot of this)'; msg.style.color = '#b3261e'; btn.disabled = false; }
   });
 })();
 </script>

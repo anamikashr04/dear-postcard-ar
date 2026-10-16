@@ -38,9 +38,19 @@ ul{padding-left:20px}
     im.src = './' + folders[0] + '/' + t.file; imgs[i] = im;
   });
   btn.addEventListener('click', async function () {
-    btn.disabled = true; var msg = document.getElementById('msg'); msg.textContent = 'Building… this takes a minute or two.';
+    btn.disabled = true; var msg = document.getElementById('msg'); msg.textContent = 'Building… keep this tab open (about 2–5 minutes).';
+    var MAX = 700;
+    var small = imgs.map(function (im) {
+      var s = Math.min(1, MAX / Math.max(im.naturalWidth, im.naturalHeight));
+      var c = document.createElement('canvas'); c.width = Math.round(im.naturalWidth * s); c.height = Math.round(im.naturalHeight * s);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return c;
+    });
+    var start = Date.now();
     var compiler = new window.MINDAR.IMAGE.Compiler();
-    await compiler.compileImageTargets(imgs, function (p) { document.querySelector('#bar div').style.width = p.toFixed(0) + '%'; });
+    await compiler.compileImageTargets(small, function (p) {
+      document.querySelector('#bar div').style.width = p.toFixed(0) + '%';
+      msg.textContent = 'Building… ' + p.toFixed(0) + '% (' + Math.round((Date.now() - start) / 1000) + ' s). Keep this tab open.';
+    });
     var buf = await compiler.exportData();
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([buf])); a.download = 'targets.mind'; a.click();
     msg.textContent = 'Done! targets.mind downloaded. Upload it to the main folder of your repository.';
